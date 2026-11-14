@@ -5,7 +5,7 @@ TOS 应用公共库，在一个仓库中维护浏览器 core、Vue UI kit 和独
 | 包 | 内容 |
 | --- | --- |
 | [tos-app-core](packages/tos-app-core/README.md) | API、CSRF、诊断、主题与语言偏好、国际化及 Vue 上下文 |
-| [tos-app-ui-kit](packages/tos-app-ui-kit/README.md) | 主题变量、文档基础样式、设置与诊断组件 |
+| [tos-app-ui-kit](packages/tos-app-ui-kit/README.md) | 主题变量、文档基础样式、两区应用框架、设置与诊断组件 |
 | [Go module](go/README.md) | HTTP、认证接入、平台客户端、数据目录和服务生命周期 |
 
 ## 安装
@@ -14,8 +14,8 @@ TOS 应用公共库，在一个仓库中维护浏览器 core、Vue UI kit 和独
 
 ```sh
 npm install --save-exact \
-  https://github.com/LuYifei2011/tos-app-kit/releases/download/v0.1.0/tos-app-core-0.1.0.tgz \
-  https://github.com/LuYifei2011/tos-app-kit/releases/download/v0.1.0/tos-app-ui-kit-0.1.0.tgz
+  https://github.com/LuYifei2011/tos-app-kit/releases/download/v0.2.0/tos-app-core-0.2.0.tgz \
+  https://github.com/LuYifei2011/tos-app-kit/releases/download/v0.2.0/tos-app-ui-kit-0.2.0.tgz
 ```
 
 应用需要 Vue 3.5。UI kit 将 core 和 Vue 声明为 peer dependency，以复用应用中同一份上下文。提交生成的 `package-lock.json`，后续使用 `npm ci` 安装锁定内容。
@@ -36,7 +36,7 @@ tos.start()
 Go module 独立安装：
 
 ```sh
-go get github.com/LuYifei2011/tos-app-kit/go@v0.1.0
+go get github.com/LuYifei2011/tos-app-kit/go@v0.2.0
 ```
 
 应用使用正常版本依赖即可构建，部署到 NAS 时无需 npm、Go 工具链或互联网。
