@@ -10,7 +10,9 @@
     "build:example": "vue-tsc --noEmit && vite build --config examples/ui-kit/vite.config.ts",
     "build": "npm run build:packages && npm run build:example",
     "dev": "npm run build:packages && vite --config examples/ui-kit/vite.config.ts --host 127.0.0.1",
-    "test": "node --experimental-strip-types --test packages/tos-app-core/tests/*.test.ts",
+    "test": "npm run test:core && npm run test:go",
+    "test:core": "node --experimental-strip-types --test packages/tos-app-core/tests/*.test.ts",
+    "test:go": "cd go && go test -race -count=1 ./...",
     "pack:release": "node scripts/pack-release.mjs"
   },
   "dependencies": { "tos-app-core": "0.2.0", "tos-app-ui-kit": "0.2.0", "vue": "^3.5.24" },

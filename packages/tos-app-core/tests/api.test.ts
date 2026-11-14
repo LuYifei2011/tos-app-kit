@@ -1,36 +1,78 @@
-import { afterEach, beforeEach, test } from 'node:test'
+import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { createApiClient, createTosApp, createTranslator, TosApiError } from '../src/index.ts'
+import { createApiClient, createTosApp, TosApiError } from '../src/index.ts'
 import type { ApiOptions } from '../src/index.ts'
-import { createTosAppVue, useTosApp } from '../src/vue.ts'
-import { createSSRApp, h } from 'vue'
-import { renderToString } from '@vue/server-renderer'
+import { tick } from './browser-fixture.ts'
 
-const keys = ['document', 'window', 'localStorage', 'navigator', 'matchMedia'] as const
-const originals = new Map(keys.map(key => [key, Object.getOwnPropertyDescriptor(globalThis, key)]))
-const cleanups: Array<() => void> = []
-let storage: Map<string, string>
-let page: EventTarget & { cookie: string; visibilityState: string }
-const tick = () => new Promise(resolve => setImmediate(resolve))
-beforeEach(() => {
-  storage = new Map()
-  page = Object.assign(new EventTarget(), { cookie: 'TMSESSNAME=secret-session; X-Csrf-Token=secret-csrf', visibilityState: 'visible' })
-  const mocks = {
-    document: page, window: new EventTarget(), navigator: { languages: ['zh-CN'] },
-    localStorage: { getItem: (key: string) => storage.get(key) ?? null, setItem: (key: string, value: string) => storage.set(key, value) },
-    matchMedia: () => Object.assign(new EventTarget(), { matches: false }),
-  }
-  for (const key of keys) Object.defineProperty(globalThis, key, { configurable: true, value: mocks[key] })
-})
-afterEach(() => {
-  for (const cleanup of cleanups.splice(0)) cleanup()
-  for (const key of keys) {
-    const descriptor = originals.get(key)
-    if (descriptor) Object.defineProperty(globalThis, key, descriptor)
-    else Reflect.deleteProperty(globalThis, key)
-  }
-})
 const client = (options: Partial<ApiOptions> = {}) => createApiClient({ appId: 'example', getRetries: 0, ...options })
+
+test('in-band session failures produce access errors instead of application data', async () => {
+  const api = client({ fetch: async () => Response.json({ is_login: false, code: false, code_num: 117 }) })
+  await assert.rejects(api.request('/status'), error => error instanceof TosApiError && error.kind === 'session')
+  assert.equal(api.snapshot.accessFailure?.kind, 'session')
+  assert.equal(api.snapshot.diagnostic?.status, 200)
+  assert.equal(api.snapshot.diagnostic?.failure, 'platform-session')
+  assert.equal(api.snapshot.diagnostic?.responseCode, '117')
+})
+
+test('empty gateway diagnostics report request flags and redact credential values', async () => {
+  Object.defineProperty(globalThis, 'location', { configurable: true, value: {
+    origin: 'http://nas:8181', pathname: '/example/', search: '?token=secret-query&source=mobile',
+  } })
+  const api = client({ diagnosticPath: () => '/list', fetch: async () => new Response(null, { status: 403 }) })
+  await assert.rejects(api.request('/list?root=secret-root&path=secret-path'))
+  const report = api.snapshot.diagnostic!
+  assert.equal(report.clientVersion, 'dev')
+  assert.equal(report.serverVersion, null)
+  assert.equal(report.responseFormat, 'empty')
+  assert.equal(report.responseBytes, 0)
+  assert.equal(report.csrfCookieAvailable, true)
+  assert.equal(report.csrfHeaderConfigured, true)
+  assert.equal(report.sessionCookieReadable, true)
+  assert.equal(report.pageOrigin, 'http://nas:8181')
+  assert.deepEqual(report.queryKeys, ['token', 'source'])
+  assert.equal(report.requestPath, '/v2/proxy/example/api/list')
+  assert.doesNotMatch(JSON.stringify(report), /secret-session|secret-csrf|secret-query|secret-root|secret-path/)
+})
+
+test('unreadable CSRF omits its header and preserves gateway denial', async () => {
+  for (const blocked of [false, true]) {
+    Object.defineProperty(globalThis, 'document', { configurable: true, value: blocked
+      ? { get cookie() { throw new Error('blocked') } } : { cookie: '' } })
+    const api = client({ fetch: async (_, options) => {
+      assert.equal(new Headers(options?.headers).has('X-Csrf-Token'), false)
+      assert.equal(options?.credentials, 'include')
+      return new Response(null, { status: 403 })
+    } })
+    await assert.rejects(api.request('/status'), error => error instanceof TosApiError && error.kind === 'denied')
+    assert.equal(api.snapshot.diagnostic?.cookieAccess, blocked ? 'blocked' : 'readable')
+    assert.equal(api.snapshot.diagnostic?.csrfHeaderConfigured, false)
+    assert.equal(api.snapshot.diagnostic?.csrfCookieAvailable, false)
+  }
+})
+
+test('network diagnostics record request flags without exception secrets', async () => {
+  const api = client({ fetch: async () => { throw new Error('secret-network-detail') } })
+  await assert.rejects(api.request('/status'), error => error instanceof TosApiError && error.kind === 'network')
+  assert.equal(api.snapshot.diagnostic?.status, null)
+  assert.equal(api.snapshot.diagnostic?.responseFormat, 'unavailable')
+  assert.equal(api.snapshot.diagnostic?.failure, 'network')
+  assert.doesNotMatch(JSON.stringify(api.snapshot.diagnostic), /secret-network-detail/)
+})
+
+test('a concurrent success preserves a blocked access-denial diagnostic', async () => {
+  let finish!: (value: Response) => void
+  const api = client({ blockOnAccessFailure: true, diagnosticPath: path => path,
+    fetch: async input => String(input).endsWith('/pending')
+      ? new Promise(resolve => { finish = resolve }) : new Response(null, { status: 403 }),
+  })
+  const pending = api.request('/pending')
+  await assert.rejects(api.request('/private'))
+  finish(Response.json([]))
+  await pending
+  assert.equal(api.snapshot.diagnostic?.status, 403)
+  assert.equal(api.snapshot.diagnostic?.requestPath, '/v2/proxy/example/api/private')
+})
 
 test('explicit methods, signals and CSRF work for a second application', async () => {
   const api = client({ fetch: async (url, init) => {
@@ -134,66 +176,4 @@ test('API paths cannot traverse or redirect credentials outside the application'
   assert.equal(calls, 0)
   assert.throws(() => client({ base: '//other/api' }), /same-origin/)
   assert.throws(() => createTosApp({ id: '../other' }), /application ID/)
-})
-test('preferences and translations are isolated between applications', async () => {
-  const a = createTosApp({ id: 'first' })
-  const b = createTosApp({ id: 'second' })
-  storage.set('first.preferences', '{"theme":"dark","language":"en-US"}')
-  storage.set('second.preferences', '{"theme":"light","language":"zh-CN"}')
-  cleanups.push(a.preferences.start(), b.preferences.start())
-  a.preferences.setTheme('light')
-  assert.equal(a.preferences.snapshot.themeSource, 'manual')
-  assert.equal(b.preferences.snapshot.language, 'zh-CN')
-  assert.equal(createTranslator(() => a.preferences.snapshot.language)('主题'), 'Theme')
-  assert.equal(createTranslator(() => b.preferences.snapshot.language)('主题'), '主题')
-  assert.equal(JSON.parse(storage.get('first.preferences')!).theme, 'light')
-  assert.equal(JSON.parse(storage.get('second.preferences')!).language, 'zh-CN')
-  await tick()
-})
-test('storage events update only their application and clearing storage resets preferences', () => {
-  storage.set('first.preferences', '{"theme":"light","language":"en-US"}')
-  const a = createTosApp({ id: 'first' })
-  cleanups.push(a.preferences.start())
-  const event = (key: string | null, newValue: string | null) => window.dispatchEvent(Object.assign(new Event('storage'), { key, newValue }))
-  event('other.preferences', '{"theme":"dark","language":"zh-CN"}')
-  assert.equal(a.preferences.snapshot.theme, 'light')
-  event('first.preferences', '{"theme":"dark","language":"zh-CN"}')
-  assert.equal(a.preferences.snapshot.theme, 'dark')
-  event(null, null)
-  assert.deepEqual(a.preferences.snapshot.preferences, { theme: 'tos', language: 'tos' })
-  assert.equal(JSON.parse(storage.get('first.preferences')!).theme, 'light', 'external updates must not echo storage writes')
-})
-test('a preference reader that ignores abort cannot prevent timeout fallback or disposal', async () => {
-  const app = createTosApp({ id: 'example', preferences: { timeoutMs: 10, readTheme: () => new Promise(() => {}), readLanguage: () => new Promise(() => {}) } })
-  const stop = app.preferences.start()
-  cleanups.push(stop)
-  await new Promise(resolve => setTimeout(resolve, 20))
-  assert.equal(app.preferences.snapshot.themeSource, 'browser')
-  stop()
-})
-test('disposal and restart ignore results from earlier preference requests', async () => {
-  const finishes: Array<(value: 'dark' | 'light') => void> = []
-  const app = createTosApp({ id: 'example', preferences: { readTheme: () => new Promise(resolve => finishes.push(resolve)), readLanguage: async () => null } })
-  const oldStop = app.preferences.start()
-  oldStop()
-  const stop = app.preferences.start()
-  cleanups.push(stop)
-  oldStop()
-  finishes[0]!('dark')
-  await tick()
-  assert.equal(app.preferences.snapshot.theme, 'light')
-  finishes[1]!('dark')
-  await tick()
-  assert.equal(app.preferences.snapshot.theme, 'dark')
-})
-test('Vue injection supplies the matching application context to independent roots', async () => {
-  for (const [id, language] of [['first', 'en-US'], ['second', 'zh-CN']] as const) {
-    const core = createTosApp({ id })
-    const tos = createTosAppVue(core)
-    cleanups.push(tos.dispose)
-    core.preferences.setLanguage(language)
-    const app = createSSRApp({ setup() { const context = useTosApp(); return () => h('p', context.core.id + ':' + context.translate('主题')) } })
-    app.use(tos)
-    assert.equal(await renderToString(app), `<p>${id}:${language === 'en-US' ? 'Theme' : '主题'}</p>`)
-  }
 })

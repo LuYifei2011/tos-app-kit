@@ -52,15 +52,34 @@ npm test
 npm run dev
 ```
 
-`npm run build` 构建两个库及 `examples/ui-kit`，`npm run dev` 打开独立示例。修改库后重新运行 `npm run build:packages`，示例会使用新的编译产物。Go 在 `go/` 中独立验证：
+`npm run build` 构建两个库及 `examples/ui-kit`，`npm run dev` 打开独立示例。修改库后重新运行 `npm run build:packages`，示例会使用新的编译产物。
+
+| 命令 | 覆盖范围 |
+| --- | --- |
+| `npm test` | 浏览器 core 和 Go module 的全部单元测试 |
+| `npm run test:core` | API、偏好设置、应用隔离和 Vue 上下文接入 |
+| `npm run test:go` | Go module 测试，包含竞态检测 |
+
+浏览器 core 的测试按逻辑归属维护：
+
+| 测试文件 | 负责行为 |
+| --- | --- |
+| `packages/tos-app-core/tests/api.test.ts` | 请求方法、重试、取消、超时、会话响应、CSRF、凭据脱敏及并发诊断 |
+| `packages/tos-app-core/tests/preferences.test.ts` | TOS 响应解析、Cookie、偏好读取与存储、浏览器回退和生命周期；超时用例使用模拟时钟 |
+| `packages/tos-app-core/tests/app.test.ts` | 应用间状态隔离、翻译上下文和 Vue 依赖注入 |
+
+应用仓库测试自身的配置和接入：专用路由、登录处理、错误映射、诊断路径规则、偏好存储命名空间及业务翻译。应用继续使用固定版本的发布包运行这些集成检查。
+
+CI 的 web 和 go 任务分别运行对应测试集。Go 静态检查可在本地执行：
 
 ```sh
 cd go
-go test -race -count=1 ./...
 go vet ./...
 ```
 
 库的浏览器主入口不导入 Vue，Vue 适配器通过 `tos-app-core/vue` 提供。UI 组件使用上下文实例共享偏好、请求和诊断状态。主题变量、可选的全局基础样式及组件样式均显式导入。
+
+界面由人工审核。运行 `npm run dev` 打开独立示例，按[界面规范](docs/DESIGN.md)检查标题栏和窗口控件留白、长标题、桌面与窄屏布局、主题语言切换、设置与诊断组件、键盘焦点及滚动。发布前在使用该库的应用中复核组件接入效果。
 
 ## 发布
 
