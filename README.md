@@ -4,9 +4,9 @@ TOS 应用公共库，在一个仓库中维护浏览器 core、Vue UI kit 和独
 
 | 包 | 内容 |
 | --- | --- |
-| [tos-app-core](packages/tos-app-core/README.md) | API、CSRF、诊断、主题与语言偏好、国际化及 Vue 上下文 |
-| [tos-app-ui-kit](packages/tos-app-ui-kit/README.md) | 主题变量、文档基础样式、两区应用框架、设置与诊断组件 |
-| [Go module](go/README.md) | HTTP、认证接入、平台客户端、数据目录和服务生命周期 |
+| [tos-app-core](packages/tos-app-core/README.md) | API、CSRF、诊断、主题与语言偏好、国际化、文件服务及 Vue 上下文 |
+| [tos-app-ui-kit](packages/tos-app-ui-kit/README.md) | 主题变量、文档基础样式、两区应用框架、设置、诊断及 NAS 文件对话框 |
+| [Go module](go/README.md) | HTTP、认证接入、平台客户端、数据目录、服务生命周期和可选 NAS 文件服务 |
 
 ## 安装
 
@@ -14,8 +14,8 @@ TOS 应用公共库，在一个仓库中维护浏览器 core、Vue UI kit 和独
 
 ```sh
 npm install --save-exact \
-  https://github.com/LuYifei2011/tos-app-kit/releases/download/v0.2.0/tos-app-core-0.2.0.tgz \
-  https://github.com/LuYifei2011/tos-app-kit/releases/download/v0.2.0/tos-app-ui-kit-0.2.0.tgz
+  https://github.com/LuYifei2011/tos-app-kit/releases/download/v0.3.0/tos-app-core-0.3.0.tgz \
+  https://github.com/LuYifei2011/tos-app-kit/releases/download/v0.3.0/tos-app-ui-kit-0.3.0.tgz
 ```
 
 应用需要 Vue 3.5。UI kit 将 core 和 Vue 声明为 peer dependency，以复用应用中同一份上下文。提交生成的 `package-lock.json`，后续使用 `npm ci` 安装锁定内容。
@@ -36,10 +36,18 @@ tos.start()
 Go module 独立安装：
 
 ```sh
-go get github.com/LuYifei2011/tos-app-kit/go@v0.2.0
+go get github.com/LuYifei2011/tos-app-kit/go@v0.3.0
 ```
 
 应用使用正常版本依赖即可构建，部署到 NAS 时无需 npm、Go 工具链或互联网。
+
+## NAS 文件选择
+
+TOS 接口使用当前登录用户的权限，与应用后端服务账号的文件访问权限可能不同，因此前端能选中路径并不保证后端能读取或处理。若所选文件需要交给应用后端处理，通常建议使用按后端实际运行身份检查权限的自定义文件服务/provider，而不是直接使用 TOS 目录接口。
+
+前端在 `createTosApp({ id: 'my-app', files: true })` 中启用默认适配器，即可让 `TosFileDialog` 与 `TosPathInput` 浏览 NAS 目录。Go 后端按 [接入说明](go/files/README.md)导入独立子包 `github.com/LuYifei2011/tos-app-kit/go/files`，创建 handler 并显式注册到应用 mux。
+
+Go 文件服务是可选能力：不导入、不注册就不会启用；已有后端或非 Go 应用可实现 HTTP 契约或传入自定义 `TosFileProvider`。组件与服务负责路径选择和元数据查询，实际文件读写由应用执行。这些能力从 v0.3.0 开始提供。
 
 ## 开发
 
@@ -66,6 +74,9 @@ npm run dev
 | --- | --- |
 | `packages/tos-app-core/tests/api.test.ts` | 请求方法、重试、取消、超时、会话响应、CSRF、凭据脱敏及并发诊断 |
 | `packages/tos-app-core/tests/preferences.test.ts` | TOS 响应解析、Cookie、偏好读取与存储、浏览器回退和生命周期；超时用例使用模拟时钟 |
+| `packages/tos-app-core/tests/file-provider.test.ts` | 默认文件服务适配器、可选配置、HTTP 契约、取消和错误隔离 |
+| `go/files/handler_test.go` | NAS 权限、会话隔离、目录边界、分页、缺失目标、超时和凭据转发 |
+| `packages/tos-app-core/tests/files.test.ts` | NAS 文件选择、保存目标校验、覆盖确认、错误恢复及请求竞态 |
 | `packages/tos-app-core/tests/app.test.ts` | 应用间状态隔离、翻译上下文和 Vue 依赖注入 |
 
 应用仓库测试自身的配置和接入：专用路由、登录处理、错误映射、诊断路径规则、偏好存储命名空间及业务翻译。应用继续使用固定版本的发布包运行这些集成检查。

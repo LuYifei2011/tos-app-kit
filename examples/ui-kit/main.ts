@@ -5,9 +5,11 @@ import 'tos-app-ui-kit/tokens.css'
 import 'tos-app-ui-kit/base.css'
 import 'tos-app-ui-kit/style.css'
 import App from './App.vue'
+import { exampleFiles } from './files'
 
 const core = createTosApp({
-  id: 'kit-example', version: '0.1.0',
+  id: 'kit-example', version: '0.3.0',
+  files: exampleFiles,
   preferences: { readTheme: async () => null, readLanguage: async () => null },
   api: { fetch: async () => Response.json({ code: 'EXAMPLE_FAILURE' }, { status: 403 }) },
 })

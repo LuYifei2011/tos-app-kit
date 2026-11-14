@@ -5,10 +5,10 @@
 安装固定版本：
 
 ```sh
-go get github.com/LuYifei2011/tos-app-kit/go@v0.2.0
+go get github.com/LuYifei2011/tos-app-kit/go@v0.3.0
 ```
 
-模块由仓库的 `go/v0.2.0` 标签发布，应用按 Go 版本依赖下载，无需检出库仓库。Go 代码不包含在 npm 包中。导入时可使用 `tosapp` 别名：
+模块由仓库的 `go/v0.3.0` 标签发布，应用按 Go 版本依赖下载，无需检出库仓库。Go 代码不包含在 npm 包中。导入时可使用 `tosapp` 别名：
 
 ```go
 import tosapp "github.com/LuYifei2011/tos-app-kit/go"
@@ -48,3 +48,7 @@ go vet ./...
 ```
 
 测试包含真实本机 HTTP/Unix socket、子进程 fd 继承、在途请求排空和超时关闭连接，需要允许创建本机监听 socket。
+
+## 可选 NAS 文件服务
+
+独立子包 [`files`](files/README.md) 提供经过当前 TOS 用户认证的共享目录、目录列表和路径详情接口，可直接配合前端 `files: true` 使用。应用显式导入并注册后才启用，根包不依赖它；可继续只使用原有 Go 工具或自建文件后端。服务不执行文件内容读写，应用仍负责实际操作的授权与冲突处理。该子包从 v0.3.0 开始提供。

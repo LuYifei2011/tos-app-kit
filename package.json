@@ -1,6 +1,6 @@
 {
   "name": "tos-app-kit",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "license": "MIT",
@@ -15,7 +15,7 @@
     "test:go": "cd go && go test -race -count=1 ./...",
     "pack:release": "node scripts/pack-release.mjs"
   },
-  "dependencies": { "tos-app-core": "0.2.0", "tos-app-ui-kit": "0.2.0", "vue": "^3.5.24" },
+  "dependencies": { "tos-app-core": "0.3.0", "tos-app-ui-kit": "0.3.0", "vue": "^3.5.24" },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.2",
     "@types/node": "^24.0.0",
