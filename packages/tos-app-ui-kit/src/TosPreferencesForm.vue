@@ -16,7 +16,8 @@ const { translate: t, languagePreference, themePreference } = useTosApp()
 label { display: flex; flex-direction: column; gap: 5px; min-width: 0; color: var(--text); font-size: 12px; }
 select { width: 100%; min-width: 0; height: 32px; padding: 0 27px 0 9px; font: inherit; color: var(--text); background: var(--field); border: 1px solid var(--border); border-radius: 4px; cursor: pointer; }
 select option { color: var(--text); background: var(--field); }
-select:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+select:hover:not(:disabled):not(:focus-visible) { border-color: var(--muted); }
+select:focus-visible { border-color: var(--focus); outline: 2px solid var(--focus); outline-offset: -2px; }
 @media(max-width: 620px) {
   .tos-preference-fields { grid-template-columns: minmax(0, 1fr); }
   select { height: 44px; }

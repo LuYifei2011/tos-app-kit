@@ -42,7 +42,9 @@ details { margin-top: 16px; }
 summary { cursor: pointer; color: var(--accent); min-height: 32px; line-height: 32px; }
 summary:hover { color: var(--text); }
 textarea { box-sizing: border-box; display: block; resize: vertical; width: 100%; height: 220px; min-height: 100px; margin: 8px 0 12px; padding: 10px; border: 1px solid var(--border); border-radius: 4px; color: var(--text); background: var(--field); font: 12px/1.6 ui-monospace, monospace; caret-color: var(--focus); }
-textarea:focus-visible, summary:focus-visible, button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+textarea:hover:not(:focus-visible) { border-color: var(--muted); }
+textarea:focus-visible { border-color: var(--focus); }
+textarea:focus-visible, summary:focus-visible, button:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
 button { min-height: 32px; padding: 0 12px; font: inherit; font-weight: 500; color: var(--text); border: 1px solid var(--border); border-radius: 4px; background: var(--secondary); cursor: pointer; }
 button:hover { background: var(--hover); }
 button:active { background: var(--active); }

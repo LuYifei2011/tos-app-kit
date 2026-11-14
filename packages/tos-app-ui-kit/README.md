@@ -32,7 +32,7 @@ import { TosAppShell } from 'tos-app-ui-kit'
 
 标题栏固定 41px，右侧默认预留 180px 给 TOS 窗口控件；可在应用根节点设置 `--tos-app-window-controls-width` 调整。外壳填满视口，内容区保留 `min-height: 0`。620px 以下切换为整页滚动，允许表单和分栏展开。分栏、底部状态、工具栏与业务对话框由应用组成。Shell 样式位于 `style.css`，同样需要导入 tokens，文档基础样式可选。
 
-图标可由应用静态导入 `@lucide/vue`，通过插槽或业务按钮使用。Shell 本身不绑定图标库，应用品牌图标可独立提供。
+文件对话框和路径输入框的通用图标使用 `@lucide/vue`，静态导入所需图标，默认尺寸 18px、线宽 1.6px，颜色跟随控件文字。应用也可静态导入 `@lucide/vue`，通过插槽或业务按钮使用。Shell 本身不绑定图标库，应用品牌图标可独立提供。
 
 ## 设置和诊断
 

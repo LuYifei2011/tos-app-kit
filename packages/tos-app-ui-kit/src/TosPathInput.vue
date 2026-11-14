@@ -56,14 +56,17 @@ watch(() => props.disabled, disabled => { if (disabled) dialogOpen.value = false
 
 <style scoped>
 .tos-path-input { display: flex; align-items: stretch; width: 100%; min-width: 0; box-sizing: border-box; border: 1px solid var(--border); border-radius: 4px; background: var(--field); color: var(--text); font: 13px/1.45 system-ui, sans-serif; }
-.tos-path-input:focus-within { outline: 2px solid var(--focus); outline-offset: 2px; }
+.tos-path-input:hover:not(.disabled):not(:focus-within) { border-color: var(--muted); }
+.tos-path-input:focus-within { border-color: var(--focus); outline: 2px solid var(--focus); outline-offset: -2px; }
 .tos-path-input input { flex: 1; width: 0; min-width: 0; height: 30px; min-height: 30px; box-sizing: border-box; margin: 0; padding: 4px 8px; border: 0; border-radius: 4px 0 0 4px; outline: none; background: transparent; color: inherit; font: inherit; caret-color: var(--text); }
 input::placeholder { color: var(--placeholder); }
 input::selection { color: var(--selected-text); background: var(--selected); }
-button { display: inline-flex; justify-content: center; align-items: center; flex: 0 0 32px; padding: 0; margin: 0; border: 0; border-left: 1px solid var(--line); border-radius: 0 4px 4px 0; color: inherit; background: var(--secondary); cursor: pointer; }
+button { display: inline-flex; justify-content: center; align-items: center; flex: 0 0 32px; padding: 0; margin: 0; border: 0; border-left: 1px solid var(--line); border-radius: 0 4px 4px 0; color: var(--muted); background: transparent; cursor: pointer; }
 button:hover:not(:disabled) { background: var(--hover); }
 button:active:not(:disabled) { background: var(--active); }
-button:focus-visible { outline: 2px solid var(--focus); outline-offset: -3px; }
+/* The wrapper owns the focus stroke; tint the button to identify its tab stop. */
+.tos-path-input input:focus-visible, .tos-path-input button:focus-visible { outline: none; }
+button:focus-visible { color: var(--accent); background: var(--selected); }
 .readonly input { background: var(--panel); }
 .disabled { opacity: .55; }
 button:disabled, input:disabled { cursor: not-allowed; }

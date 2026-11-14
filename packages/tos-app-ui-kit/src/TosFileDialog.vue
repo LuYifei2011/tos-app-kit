@@ -313,7 +313,7 @@ onBeforeUnmount(() => { cleanup(); dialog.value?.close() })
 </template>
 
 <style scoped>
-.tos-file-dialog, .tos-overwrite-dialog { box-sizing: border-box; margin: auto; padding: 0; color: var(--text); background: var(--dialog); border: 1px solid var(--line); border-radius: 6px; box-shadow: 0 16px 48px #0004; font: 13px/1.45 system-ui, sans-serif; color-scheme: inherit; }
+.tos-file-dialog, .tos-overwrite-dialog { box-sizing: border-box; margin: auto; padding: 0; color: var(--text); background: var(--dialog); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 16px 48px #0004; font: 13px/1.45 system-ui, sans-serif; color-scheme: inherit; }
 .tos-file-dialog { width: min(840px, calc(100vw - 32px)); max-width: none; max-height: calc(100dvh - 32px); overflow: hidden; }
 .tos-file-dialog::backdrop { background: var(--backdrop); }
 .tos-overwrite-dialog::backdrop { background: #0005; }
@@ -327,11 +327,14 @@ button:hover:not(:disabled) { background: var(--hover); }
 button:active:not(:disabled) { background: var(--active); }
 button:disabled { opacity: .4; cursor: default; }
 button:focus-visible, input:focus-visible, select:focus-visible, [role=option]:focus-visible, .listing:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+input:hover:not(:disabled):not(:focus-visible), select:hover:not(:disabled):not(:focus-visible) { border-color: var(--muted); }
+input:focus-visible, select:focus-visible { border-color: var(--focus); }
 input, select { min-width: 0; width: 100%; padding: 4px 8px; caret-color: var(--text); }
 input::placeholder { color: var(--placeholder); }
 input::selection { color: var(--selected-text); background: var(--selected); }
 button.primary { background: var(--primary); color: var(--on-primary); border-color: var(--primary-border); }
 button.primary:hover:not(:disabled) { background: var(--primary-hover); }
+button.primary:focus-visible { outline-color: var(--on-primary); outline-offset: -4px; }
 .icon-button { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; min-width: 32px; padding: 0; border-color: transparent; background: transparent; }
 .toolbar { flex: none; display: flex; gap: 10px; align-items: center; padding: 10px 12px; border-bottom: 1px solid var(--line); }
 .navigation { display: flex; gap: 2px; }
@@ -342,8 +345,13 @@ button.primary:hover:not(:disabled) { background: var(--primary-hover); }
 .breadcrumbs button { display: flex; align-items: center; gap: 6px; min-height: 28px; padding: 2px 6px; white-space: nowrap; border: 0; background: transparent; }
 .address-form { flex: 1; min-width: 0; }
 .address-form input { height: 30px; min-height: 30px; border: 0; }
+.address-bar:has(.address-form input:focus-visible) { border-color: var(--focus); outline: 2px solid var(--focus); outline-offset: -2px; }
+.address-form input:focus-visible { outline: none; }
 .search { display: flex; align-items: center; gap: 6px; width: 175px; padding-left: 8px; border: 1px solid var(--border); border-radius: 4px; background: var(--field); color: var(--muted); }
 .search input { border: 0; min-height: 30px; padding-left: 0; background: transparent; }
+.search:hover:not(:has(input:disabled)):not(:focus-within) { border-color: var(--muted); }
+.search:focus-within { color: var(--accent); border-color: var(--focus); outline: 2px solid var(--focus); outline-offset: -2px; }
+.search input:focus-visible { outline: none; }
 .browser-body { display: grid; grid-template-columns: 164px minmax(0, 1fr); flex: 1; min-height: 100px; }
 .places { padding: 10px 6px; background: var(--panel); border-right: 1px solid var(--line); overflow-y: auto; }
 .place { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; padding: 5px 8px; margin-bottom: 3px; background: transparent; border: 1px solid transparent; }
@@ -359,7 +367,7 @@ button.primary:hover:not(:disabled) { background: var(--primary-hover); }
 .listing { flex: 1; min-height: 0; overflow: auto; }
 .file-row { min-height: 34px; cursor: default; user-select: none; border: 1px solid transparent; padding-inline: 11px; }
 .file-row:hover { background: var(--row-hover); }
-.file-row.selected { background: var(--selected); color: var(--selected-text); border-color: var(--selected-border); }
+.file-row.selected { background: var(--selected); color: var(--selected-text); }
 .entry-name { display: flex; align-items: center; min-width: 0; gap: 8px; }
 .entry-name > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .date-column, .type-column, .size-column { font-size: 12px; color: var(--muted); white-space: nowrap; }
