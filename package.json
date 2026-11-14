@@ -1,0 +1,25 @@
+{
+  "name": "tos-app-kit",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "workspaces": ["packages/tos-app-core", "packages/tos-app-ui-kit"],
+  "scripts": {
+    "build:packages": "node scripts/clean-packages.mjs && npm run build -w tos-app-core && npm run build -w tos-app-ui-kit",
+    "build:example": "vue-tsc --noEmit && vite build --config examples/ui-kit/vite.config.ts",
+    "build": "npm run build:packages && npm run build:example",
+    "dev": "npm run build:packages && vite --config examples/ui-kit/vite.config.ts --host 127.0.0.1",
+    "test": "node --experimental-strip-types --test packages/tos-app-core/tests/*.test.ts",
+    "pack:release": "node scripts/pack-release.mjs"
+  },
+  "dependencies": { "tos-app-core": "0.1.0", "tos-app-ui-kit": "0.1.0", "vue": "^3.5.24" },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.2",
+    "@types/node": "^24.0.0",
+    "typescript": "~5.9.3",
+    "vite": "^7.2.2",
+    "vue-tsc": "^3.1.4"
+  },
+  "repository": { "type": "git", "url": "https://github.com/LuYifei2011/tos-app-kit.git" }
+}

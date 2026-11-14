@@ -1,0 +1,37 @@
+{
+  "name": "tos-app-ui-kit",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Vue components and styles for TOS applications",
+  "license": "MIT",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./tokens.css": "./dist/tokens.css",
+    "./base.css": "./dist/base.css",
+    "./style.css": "./dist/style.css"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "scripts": {
+    "build": "vue-tsc -p tsconfig.build.json && vite build && node ../../scripts/copy-ui-styles.mjs"
+  },
+  "peerDependencies": {
+    "tos-app-core": "0.1.0",
+    "vue": "^3.5.24"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LuYifei2011/tos-app-kit.git",
+    "directory": "packages/tos-app-ui-kit"
+  }
+}
