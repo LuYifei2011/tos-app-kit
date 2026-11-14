@@ -5,10 +5,10 @@
 安装固定版本：
 
 ```sh
-go get github.com/LuYifei2011/tos-app-kit/go@v0.3.1
+go get github.com/LuYifei2011/tos-app-kit/go@v0.3.2
 ```
 
-模块由仓库的 `go/v0.3.1` 标签发布，应用按 Go 版本依赖下载，无需检出库仓库。Go 代码不包含在 npm 包中。导入时可使用 `tosapp` 别名：
+模块由仓库的 `go/v0.3.2` 标签发布，应用按 Go 版本依赖下载，无需检出库仓库。Go 代码不包含在 npm 包中。导入时可使用 `tosapp` 别名：
 
 ```go
 import tosapp "github.com/LuYifei2011/tos-app-kit/go"

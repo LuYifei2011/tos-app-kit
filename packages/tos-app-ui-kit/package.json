@@ -1,6 +1,6 @@
 {
   "name": "tos-app-ui-kit",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "type": "module",
   "description": "Vue components and styles for TOS applications",
   "license": "MIT",
@@ -27,7 +27,7 @@
     "build": "vue-tsc -p tsconfig.build.json && vite build && node ../../scripts/copy-ui-styles.mjs"
   },
   "peerDependencies": {
-    "tos-app-core": "0.3.1",
+    "tos-app-core": "0.3.2",
     "vue": "^3.5.24"
   },
   "repository": {

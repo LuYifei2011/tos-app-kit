@@ -1,6 +1,6 @@
 # 可选 NAS 文件服务
 
-`github.com/LuYifei2011/tos-app-kit/go/files` 是 Go module 内的独立子包，为文件对话框和路径输入提供目录与元数据查询。根包不导入它；应用显式调用 `Register` 才启用接口，服务不创建监听器、不修改全局 mux、不启动后台任务。从 v0.3.0 开始提供，安装：`go get github.com/LuYifei2011/tos-app-kit/go@v0.3.1`。
+`github.com/LuYifei2011/tos-app-kit/go/files` 是 Go module 内的独立子包，为文件对话框和路径输入提供目录与元数据查询。根包不导入它；应用显式调用 `Register` 才启用接口，服务不创建监听器、不修改全局 mux、不启动后台任务。从 v0.3.0 开始提供，安装：`go get github.com/LuYifei2011/tos-app-kit/go@v0.3.2`。
 
 TOS 接口使用当前登录用户的权限，与应用后端服务账号的文件访问权限可能不同，因此前端能选中路径并不保证后端能读取或处理。若所选文件需要交给应用后端处理，通常建议使用按后端实际运行身份检查权限的自定义文件服务/provider，而不是直接使用 TOS 目录接口。
 

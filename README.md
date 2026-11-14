@@ -14,8 +14,8 @@ TOS 应用公共库，在一个仓库中维护浏览器 core、Vue UI kit 和独
 
 ```sh
 npm install --save-exact \
-  https://github.com/LuYifei2011/tos-app-kit/releases/download/v0.3.1/tos-app-core-0.3.1.tgz \
-  https://github.com/LuYifei2011/tos-app-kit/releases/download/v0.3.1/tos-app-ui-kit-0.3.1.tgz
+  https://github.com/LuYifei2011/tos-app-kit/releases/download/v0.3.2/tos-app-core-0.3.2.tgz \
+  https://github.com/LuYifei2011/tos-app-kit/releases/download/v0.3.2/tos-app-ui-kit-0.3.2.tgz
 ```
 
 应用需要 Vue 3.5。UI kit 将 core 和 Vue 声明为 peer dependency，以复用应用中同一份上下文。提交生成的 `package-lock.json`，后续使用 `npm ci` 安装锁定内容。
@@ -36,7 +36,7 @@ tos.start()
 Go module 独立安装：
 
 ```sh
-go get github.com/LuYifei2011/tos-app-kit/go@v0.3.1
+go get github.com/LuYifei2011/tos-app-kit/go@v0.3.2
 ```
 
 应用使用正常版本依赖即可构建，部署到 NAS 时无需 npm、Go 工具链或互联网。
